@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EditingMitten39 | Liquid 3D</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EditingMitten39 | Liquid Gyro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
@@ -16,7 +16,7 @@
             --spotify: #1DB954;
         }
 
-        * { cursor: crosshair; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+        * { cursor: crosshair; box-sizing: border-box; -webkit-font-smoothing: antialiased; touch-action: manipulation; }
         
         body, html { 
             margin: 0; padding: 0; height: 100%; width: 100%; 
@@ -28,7 +28,6 @@
             perspective: 1500px;
         }
 
-        /* RESTORED: Old Entry Screen Animation */
         #entry-screen { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: #000; z-index: 9999; 
@@ -36,82 +35,73 @@
             transition: opacity 0.8s ease; 
         }
         #entry-screen.hidden { opacity: 0; visibility: hidden; }
-        .click-text { 
-            font-weight: 900; 
-            letter-spacing: 5px; 
-            font-size: 1rem;
-            opacity: 0.5; 
-            animation: oldBlink 1.5s infinite; 
-        }
+        .click-text { font-weight: 900; letter-spacing: 5px; opacity: 0.5; animation: oldBlink 1.5s infinite; }
         @keyframes oldBlink { 50% { opacity: 0.05; } }
 
-        /* 3D Liquid Glass Card */
+        /* Motion Request Button (Mobile only) */
+        #motion-btn {
+            position: fixed; bottom: 20px; background: var(--glass);
+            border: 1px solid var(--glass-border); color: white;
+            padding: 10px 20px; border-radius: 20px; font-size: 0.7rem;
+            backdrop-filter: blur(10px); z-index: 100; display: none;
+        }
+
         .profile-card { 
-            width: 380px; 
+            width: 340px; /* Slimmer for mobile */
+            max-width: 90vw;
             background: var(--glass);
             backdrop-filter: blur(40px) saturate(180%);
             -webkit-backdrop-filter: blur(40px) saturate(180%);
             border: 1px solid var(--glass-border);
             border-top: 1.5px solid var(--specular); 
             border-radius: 40px; 
-            padding: 45px 30px; 
+            padding: 35px 25px; 
             text-align: center; 
             box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
-            
-            /* Entry Animation State */
             opacity: 0;
-            transform: rotateX(20deg) rotateY(-20deg) scale(0.8) translateZ(-100px);
+            transform: rotateX(20deg) rotateY(-20deg) scale(0.8);
             transform-style: preserve-3d;
-            transition: opacity 1s ease, transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: opacity 1s ease, transform 0.15s ease-out;
             position: relative;
             overflow: hidden;
         }
 
-        .profile-card.visible { 
-            opacity: 1; 
-            transform: rotateX(0deg) rotateY(0deg) scale(1) translateZ(0); 
-        }
+        .profile-card.visible { opacity: 1; transform: rotateX(0deg) rotateY(0deg) scale(1); }
 
-        /* Mouse Shine Layer */
         .shine {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: radial-gradient(circle at var(--mx) var(--my), rgba(255,255,255,0.12) 0%, transparent 70%);
-            pointer-events: none;
-            z-index: 1;
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.12) 0%, transparent 70%);
+            pointer-events: none; z-index: 1;
         }
 
-        /* 3D Depth Elements */
-        .avatar-box, h1, #spotify, .volume-container { transform: translateZ(60px); }
-        .username { transform: translateZ(40px); opacity: 0.4; font-size: 0.85rem; margin-top: 5px; }
-
-        .avatar-box { position: relative; width: 105px; height: 105px; margin: 0 auto 24px; }
+        .avatar-box, h1, #spotify, .volume-container { transform: translateZ(50px); }
+        .avatar-box { position: relative; width: 90px; height: 90px; margin: 0 auto 20px; }
         #discord-pfp { width: 100%; height: 100%; border-radius: 50%; border: 1px solid var(--glass-border); }
-        .status-dot { position: absolute; bottom: 6px; right: 6px; width: 20px; height: 20px; border-radius: 50%; border: 3.5px solid #080808; }
+        .status-dot { position: absolute; bottom: 5px; right: 5px; width: 18px; height: 18px; border-radius: 50%; border: 3px solid #080808; }
 
-        h1 { font-weight: 800; font-size: 1.7rem; margin: 0; letter-spacing: -0.8px; }
+        h1 { font-weight: 800; font-size: 1.5rem; margin: 0; letter-spacing: -0.8px; }
+        .username { transform: translateZ(30px); opacity: 0.4; font-size: 0.8rem; margin-top: 5px; }
 
         #spotify { 
-            margin-top: 32px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--glass-border);
-            border-radius: 24px; padding: 14px; display: flex; align-items: center; gap: 16px; text-align: left;
+            margin-top: 25px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--glass-border);
+            border-radius: 20px; padding: 12px; display: flex; align-items: center; gap: 12px; text-align: left;
         }
-        #album-art { width: 56px; height: 56px; border-radius: 12px; }
-        .spot-header { font-size: 0.6rem; font-weight: 700; color: var(--spotify); letter-spacing: 1px; text-transform: uppercase; }
-        #track-name { font-weight: 700; font-size: 0.9rem; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        #artist-name { font-size: 0.75rem; opacity: 0.5; display: block; }
-        .bar { width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-top: 10px; }
+        #album-art { width: 48px; height: 48px; border-radius: 10px; }
+        .spot-header { font-size: 0.55rem; font-weight: 700; color: var(--spotify); letter-spacing: 1px; text-transform: uppercase; }
+        #track-name { font-weight: 700; font-size: 0.8rem; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        #artist-name { font-size: 0.7rem; opacity: 0.5; display: block; }
+        .bar { width: 100%; height: 3px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-top: 8px; }
         #progress-bar { width: 0%; height: 100%; background: var(--spotify); border-radius: 10px; }
 
         .volume-container { 
-            margin-top: 28px; display: flex; align-items: center; justify-content: center; gap: 14px; 
-            background: rgba(255,255,255,0.03); padding: 10px 20px; border-radius: 20px; border: 1px solid var(--glass-border);
+            margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 12px; 
+            background: rgba(255,255,255,0.03); padding: 8px 15px; border-radius: 15px; border: 1px solid var(--glass-border);
         }
-        #volume-slider { -webkit-appearance: none; width: 110px; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 10px; outline: none; }
-        #volume-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; background: #fff; border-radius: 50%; cursor: pointer; }
+        #volume-slider { -webkit-appearance: none; width: 100%; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 10px; outline: none; }
+        #volume-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; background: #fff; border-radius: 50%; }
 
-        .socials { display: flex; justify-content: center; gap: 28px; margin-top: 28px; transform: translateZ(30px); }
-        .socials a { color: white; font-size: 1.2rem; opacity: 0.35; transition: 0.3s; }
-        .socials a:hover { opacity: 1; transform: translateY(-3px); }
+        .socials { display: flex; justify-content: center; gap: 25px; margin-top: 25px; transform: translateZ(20px); }
+        .socials a { color: white; font-size: 1.1rem; opacity: 0.35; }
     </style>
 </head>
 <body onclick="startProfile()">
@@ -120,21 +110,20 @@
         <div class="click-text">CLICK TO ENTER</div>
     </div>
 
+    <button id="motion-btn" onclick="requestMotion()">Enable 3D Motion</button>
+
     <audio id="local-audio" loop>
         <source src="Saved (feat. E-40).m4a" type="audio/mpeg">
     </audio>
 
     <div class="profile-card" id="card">
-        <div class="shine" id="shine"></div>
-        
+        <div class="shine"></div>
         <div class="avatar-box">
             <img id="discord-pfp" src="" alt="">
             <div id="status-dot" class="status-dot"></div>
         </div>
-
         <h1>EditingMitten39</h1>
         <div class="username">@editingmitten39</div>
-
         <div id="spotify">
             <img id="album-art" src="https://cdn-icons-png.flaticon.com/512/174/174872.png" alt="">
             <div class="song-info">
@@ -144,13 +133,11 @@
                 <div class="bar"><div id="progress-bar"></div></div>
             </div>
         </div>
-
         <div class="volume-container">
             <i class="fa-solid fa-volume-low"></i>
             <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5">
             <i class="fa-solid fa-volume-high"></i>
         </div>
-
         <div class="socials">
             <a href="https://discord.com/users/915185879788683305" target="_blank"><i class="fa-brands fa-discord"></i></a>
             <a href="#"><i class="fa-brands fa-instagram"></i></a>
@@ -165,64 +152,67 @@
         const volumeSlider = document.getElementById('volume-slider');
         let isEntered = false;
 
-        // 3D MOUSE LOGIC
+        // 1. DESKTOP MOUSE TRACKING
         document.addEventListener('mousemove', (e) => {
-            if (!isEntered) return;
-
-            const cx = window.innerWidth / 2;
-            const cy = window.innerHeight / 2;
-            const dx = e.clientX - cx;
-            const dy = e.clientY - cy;
-
-            // Sensitivity (Adjust these numbers to change tilt intensity)
-            const tiltX = (dy / cy) * -15; 
-            const tiltY = (dx / cx) * 15;
-
+            if (!isEntered || window.DeviceOrientationEvent && 'ontouchstart' in window) return;
+            const tiltX = (e.clientY / window.innerHeight - 0.5) * -30; 
+            const tiltY = (e.clientX / window.innerWidth - 0.5) * 30;
             card.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
-            
-            // Shine position
-            const rect = card.getBoundingClientRect();
-            card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
-            card.style.setProperty('--my', `${e.clientY - rect.top}px`);
+            card.style.setProperty('--mx', `${e.offsetX}px`);
+            card.style.setProperty('--my', `${e.offsetY}px`);
         });
 
-        // Entry function
+        // 2. MOBILE GYRO TRACKING
+        function handleOrientation(event) {
+            if (!isEntered) return;
+            const tiltX = Math.min(Math.max(event.beta - 45, -30), 30); // Center at 45deg hold
+            const tiltY = Math.min(Math.max(event.gamma, -30), 30);
+            card.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+        }
+
+        async function requestMotion() {
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                const permission = await DeviceOrientationEvent.requestPermission();
+                if (permission === 'granted') {
+                    window.addEventListener('deviceorientation', handleOrientation);
+                    document.getElementById('motion-btn').style.display = 'none';
+                }
+            } else {
+                window.addEventListener('deviceorientation', handleOrientation);
+            }
+        }
+
         function startProfile() {
             if (isEntered) return;
             isEntered = true;
             document.getElementById('entry-screen').classList.add('hidden');
             card.classList.add('visible');
-            localAudio.volume = volumeSlider.value;
             localAudio.play();
+            if (window.DeviceOrientationEvent && 'ontouchstart' in window) {
+                document.getElementById('motion-btn').style.display = 'block';
+            }
         }
 
         volumeSlider.addEventListener('input', (e) => { localAudio.volume = e.target.value; });
 
-        // API Updates
         async function updateData() {
             try {
                 const res = await fetch(`https://api.lanyard.rest/v1/users/${USER_ID}`);
                 const { data } = await res.json();
-                
-                if (data.discord_user.avatar) {
-                    document.getElementById('discord-pfp').src = `https://cdn.discordapp.com/avatars/${USER_ID}/${data.discord_user.avatar}.png?size=512`;
-                }
+                document.getElementById('discord-pfp').src = `https://cdn.discordapp.com/avatars/${USER_ID}/${data.discord_user.avatar}.png?size=512`;
                 const colors = { online: '#43b581', idle: '#faa61a', dnd: '#f04747', offline: '#747f8d' };
                 document.getElementById('status-dot').style.background = colors[data.discord_status] || '#747f8d';
-
                 if (data.listening_to_spotify && data.spotify) {
                     document.getElementById('track-name').innerText = data.spotify.song || data.spotify.track;
                     document.getElementById('artist-name').innerText = data.spotify.artist;
                     document.getElementById('album-art').src = data.spotify.album_art_url;
-                    
                     const total = data.spotify.timestamps.end - data.spotify.timestamps.start;
                     const elapsed = Date.now() - data.spotify.timestamps.start;
                     document.getElementById('progress-bar').style.width = Math.min(100, (elapsed / total) * 100) + "%";
                 }
             } catch (e) {}
         }
-        setInterval(updateData, 1000);
-        updateData();
+        setInterval(updateData, 1000); updateData();
     </script>
 </body>
 </html>
